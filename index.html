@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BalisticData — DS-003</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#070d17;
+    --bg-1:#0d1b2e;
+    --bg-2:#12253d;
+    --line:#1e3350;
+    --amber:#e8a33d;
+    --amber-dim:#8a6529;
+    --cyan:#3ecfe0;
+    --cyan-dim:#245c66;
+    --red:#e0574c;
+    --green:#4fbf88;
+    --text-0:#eef2f7;
+    --text-1:#aab8cc;
+    --text-2:#6c7b93;
+    --radius:2px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    background:
+      radial-gradient(circle at 15% -10%, #10233b 0%, transparent 45%),
+      var(--bg-0);
+    color:var(--text-0);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+    padding-bottom:80px;
+  }
+
+  a{color:var(--cyan); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .display{font-family:'Oswald', sans-serif; text-transform:uppercase; letter-spacing:.04em;}
+
+  /* ---------- Header ---------- */
+  header{
+    border-bottom:1px solid var(--line);
+    padding:28px 6vw 22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+    background:linear-gradient(180deg, var(--bg-1), var(--bg-0));
+  }
+  .back-link{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.72rem;
+    color:var(--text-2);
+    margin-bottom:14px;
+  }
+  .brand-row{display:flex; align-items:center; gap:14px;}
+  .brand-mark{
+    width:38px; height:38px;
+    border:2px solid var(--amber);
+    border-radius:50%;
+    position:relative;
+    flex-shrink:0;
+  }
+  .brand-mark::before, .brand-mark::after{
+    content:"";
+    position:absolute;
+    background:var(--amber);
+  }
+  .brand-mark::before{ top:50%; left:-6px; right:-6px; height:1px; transform:translateY(-50%);}
+  .brand-mark::after{ left:50%; top:-6px; bottom:-6px; width:1px; transform:translateX(-50%);}
+  .brand-mark .dot{
+    position:absolute; top:50%; left:50%; width:5px; height:5px;
+    background:var(--amber); border-radius:50%; transform:translate(-50%,-50%);
+  }
+  h1{
+    font-size:clamp(1.6rem, 3.4vw, 2.3rem);
+    font-weight:700;
+    letter-spacing:.03em;
+  }
+  .tagline{color:var(--text-2); font-size:.85rem; margin-top:4px; font-family:'IBM Plex Mono', monospace;}
+  .id-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.72rem;
+    color:var(--bg-0);
+    background:var(--amber);
+    padding:3px 8px;
+    border-radius:var(--radius);
+    letter-spacing:.06em;
+    font-weight:600;
+  }
+  .meta-badges{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.72rem;
+    color:var(--text-1);
+    border:1px solid var(--line);
+    padding:5px 10px;
+    border-radius:var(--radius);
+    background:var(--bg-2);
+  }
+  .badge b{color:var(--cyan); font-weight:600;}
+
+  main{padding:0 6vw;}
+  section{margin-top:52px;}
+  .section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:18px;}
+  .section-head h2{font-size:1.05rem; letter-spacing:.06em;}
+  .section-head .rule{flex:1; height:1px; background:var(--line);}
+  .section-note{color:var(--text-2); font-size:.8rem; margin-top:-8px; margin-bottom:18px; max-width:60ch;}
+
+  /* ---------- KPIs ---------- */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .kpi{
+    background:var(--bg-1);
+    padding:20px 18px;
+    position:relative;
+  }
+  .kpi::before{
+    content:"";
+    position:absolute; top:0; left:0; width:22px; height:2px;
+    background:var(--amber);
+  }
+  .kpi .label{font-size:.68rem; color:var(--text-2); text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px;}
+  .kpi .value{font-family:'IBM Plex Mono', monospace; font-size:1.9rem; font-weight:600; color:var(--text-0);}
+  .kpi .unit{font-size:.95rem; color:var(--text-2); margin-left:3px;}
+  .kpi .sub{font-size:.72rem; color:var(--cyan); margin-top:6px; font-family:'IBM Plex Mono', monospace;}
+
+  /* ---------- Day selector (clip de cartuchos) ---------- */
+  .day-clip{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:26px;}
+  .round{
+    width:46px; height:64px;
+    border:1px solid var(--line);
+    border-radius:4px 4px 10px 10px;
+    background:var(--bg-2);
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    display:flex; align-items:flex-end; justify-content:center;
+    transition:border-color .15s;
+  }
+  .round:hover{border-color:var(--amber-dim);}
+  .round.active{border-color:var(--amber);}
+  .round .fill{
+    position:absolute; left:0; right:0; bottom:0;
+    background:linear-gradient(180deg, var(--amber-dim), var(--amber));
+    transition:height .2s;
+  }
+  .round .lbl{
+    position:relative; z-index:1;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.68rem;
+    padding-bottom:6px;
+    color:var(--text-0);
+    text-shadow:0 1px 2px rgba(0,0,0,.6);
+  }
+  .day-clip-note{font-size:.7rem; color:var(--text-2); margin-top:-16px; margin-bottom:28px; font-family:'IBM Plex Mono', monospace;}
+
+  /* ---------- Radar + evolution grid ---------- */
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line);}
+  .panel{background:var(--bg-1); padding:22px;}
+  .panel h3{font-size:.78rem; letter-spacing:.06em; color:var(--text-1); text-transform:uppercase; margin-bottom:14px;}
+  @media(max-width:860px){ .grid-2{grid-template-columns:1fr;} }
+
+  svg{display:block; width:100%; height:auto;}
+  .axis-label{font-size:9px; font-family:'IBM Plex Mono', monospace; fill:var(--text-1);}
+  .grid-ring{fill:none; stroke:var(--line);}
+  .radar-shape{fill:var(--amber); fill-opacity:.14; stroke:var(--amber); stroke-width:1.6;}
+  .radar-shape.compare{fill:var(--cyan); fill-opacity:.08; stroke:var(--cyan); stroke-dasharray:3 3; stroke-width:1.3;}
+  .radar-vertex{fill:var(--amber);}
+  .radar-vertex.compare{fill:var(--cyan);}
+
+  .evo-line{fill:none; stroke:var(--amber); stroke-width:1.8;}
+  .evo-dot{fill:var(--bg-1); stroke:var(--amber); stroke-width:1.6;}
+  .evo-dot.current{fill:var(--amber);}
+  .evo-axis{stroke:var(--line); stroke-width:1;}
+  .evo-tick{font-size:8.5px; fill:var(--text-2); font-family:'IBM Plex Mono', monospace;}
+  .evo-title{font-size:.72rem; color:var(--text-2); font-family:'IBM Plex Mono', monospace; margin-bottom:6px;}
+
+  /* ---------- Lamina viewer ---------- */
+  .lamina-wrap{display:grid; grid-template-columns:1fr 300px; gap:1px; background:var(--line); border:1px solid var(--line);}
+  @media(max-width:860px){ .lamina-wrap{grid-template-columns:1fr;} }
+  .lamina-svg-box{background:var(--bg-1); padding:20px; display:flex; align-items:center; justify-content:center;}
+  .lamina-svg-box svg{max-width:420px;}
+  .target-rect{fill:none; stroke:var(--text-1); stroke-width:.6;}
+  .target-ellipse{fill:var(--cyan); fill-opacity:.08; stroke:var(--cyan); stroke-dasharray:1.4 1.2; stroke-width:.6;}
+  .impact{fill:var(--amber); stroke:var(--bg-0); stroke-width:.3;}
+  .impact.outlier{fill:none; stroke:var(--red); stroke-width:.9;}
+  .centroid-mark{stroke:var(--text-0); stroke-width:.8;}
+  .aim-mark{fill:var(--green);}
+
+  .lamina-info{background:var(--bg-1); padding:22px; display:flex; flex-direction:column; gap:14px;}
+  .lamina-info .row{display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:8px; font-size:.82rem;}
+  .lamina-info .row span:first-child{color:var(--text-2);}
+  .lamina-info .row span:last-child{font-family:'IBM Plex Mono', monospace; color:var(--text-0);}
+  .lamina-info .legend{display:flex; flex-direction:column; gap:6px; margin-top:6px; font-size:.72rem; color:var(--text-2);}
+  .legend-item{display:flex; align-items:center; gap:8px;}
+  .swatch{width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+
+  footer{
+    margin-top:70px; padding:24px 6vw; border-top:1px solid var(--line);
+    color:var(--text-2); font-size:.75rem; font-family:'IBM Plex Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <a class="back-link" href="https://mnl14.github.io">← mnl14.github.io</a>
+    <div class="brand-row">
+      <div class="brand-mark"><div class="dot"></div></div>
+      <div>
+        <h1>BlisticData</h1>
+        <div class="tagline">Análisis de rendimiento de tiro — entrenamiento y progresión</div>
+      </div>
+    </div>
+  </div>
+  <div class="meta-badges">
+    <span class="id-badge">DS-004</span>
+    <span class="badge">ARMA <b id="badge-arma">—</b></span>
+    <span class="badge">DISTANCIA <b id="badge-dist">—</b></span>
+    <span class="badge"><span id="badge-range">—</span></span>
+  </div>
+</header>
+
+<main>
+
+  <section id="kpis">
+    <div class="section-head"><h2 class="display">Resumen del bloque</h2><div class="rule"></div></div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+  </section>
+
+  <section id="evolucion">
+    <div class="section-head"><h2 class="display">Evolución — 7 sesiones</h2><div class="rule"></div></div>
+    <div class="section-note">Un cartucho por día de entrenamiento. El nivel de llenado representa la precisión de esa sesión.</div>
+    <div class="day-clip" id="day-clip"></div>
+    <div class="day-clip-note">Seleccioná un día para ver su radar y su lámina en detalle abajo.</div>
+
+    <div class="grid-2" style="margin-top:26px;">
+      <div class="panel">
+        <h3>Precisión por sesión</h3>
+        <svg id="evo-precision" viewBox="0 0 320 130"></svg>
+      </div>
+      <div class="panel">
+        <h3>Apuntando (offset, cm)</h3>
+        <svg id="evo-apuntando" viewBox="0 0 320 130"></svg>
+      </div>
+      <div class="panel">
+        <h3>Velocidad (tiempo de serie, seg)</h3>
+        <svg id="evo-velocidad" viewBox="0 0 320 130"></svg>
+      </div>
+      <div class="panel">
+        <h3>Reflejos (tiempo a 1er disparo, seg)</h3>
+        <svg id="evo-reflejos" viewBox="0 0 320 130"></svg>
+      </div>
+    </div>
+  </section>
+
+  <section id="radar">
+    <div class="section-head"><h2 class="display">Radar de desempeño — <span id="radar-day-label" class="mono"></span></h2><div class="rule"></div></div>
+    <div class="section-note">Normalizado 0–100 contra el historial propio de las 7 sesiones. Comparado contra la sesión 1 (línea punteada cian).</div>
+    <div class="panel" style="max-width:520px;">
+      <svg id="radar-svg" viewBox="0 0 300 300"></svg>
+    </div>
+  </section>
+
+  <section id="lamina">
+    <div class="section-head"><h2 class="display">Lámina — <span id="lamina-day-label" class="mono"></span></h2><div class="rule"></div></div>
+    <div class="lamina-wrap">
+      <div class="lamina-svg-box">
+        <svg id="lamina-svg" viewBox="-25 -30 50 60"></svg>
+      </div>
+      <div class="lamina-info">
+        <div class="row"><span>Fecha</span><span id="li-fecha">—</span></div>
+        <div class="row"><span>Arma / Distancia</span><span id="li-arma">—</span></div>
+        <div class="row"><span>Disparos</span><span id="li-disparos">—</span></div>
+        <div class="row"><span>Aciertos</span><span id="li-aciertos">—</span></div>
+        <div class="row"><span>Precisión</span><span id="li-precision">—</span></div>
+        <div class="row"><span>Apuntando</span><span id="li-apuntando">—</span></div>
+        <div class="row"><span>Tiempo de serie</span><span id="li-velocidad">—</span></div>
+        <div class="row"><span>Reflejos</span><span id="li-reflejos">—</span></div>
+        <div class="legend">
+          <div class="legend-item"><span class="swatch" style="background:var(--amber)"></span> Impacto</div>
+          <div class="legend-item"><span class="swatch" style="border:1.5px solid var(--red); background:transparent"></span> Outlier descartado</div>
+          <div class="legend-item"><span class="swatch" style="background:var(--green)"></span> Punto de puntería</div>
+          <div class="legend-item"><span class="swatch" style="background:var(--cyan)"></span> Elipse de confianza</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  BalisticData — DS-003 · Proyecto de portfolio de Manuel (mnl14) · Datos sintéticos de demostración
+</footer>
+
+<script>
+const TARGET = { width: 40, height: 50 };
+
+const SESSIONS = [
+  {id:"sesion_001", day:1, date:"2026-08-19", arma:"Glock", distancia_m:10, n_disparos:10, n_aciertos:5, precision:0.5, apuntando:20.149, velocidad:24.01, reflejos:2.88, control_exc:0.6545,
+   centroid:[19.93,-2.96], ellipse:[51.36,38.83,-179.15],
+   impacts:[[31.57,2.05],[-37.1,-9.0],[19.41,-7.46],[6.97,6.07],[24.46,5.86],[11.4,-10.92],[31.58,-9.15],[6.44,-29.3],[-1.23,19.51],[14.13,-7.14]],
+   inliers:[true,false,true,true,true,true,true,false,false,true]},
+  {id:"sesion_002", day:2, date:"2026-08-20", arma:"Glock", distancia_m:10, n_disparos:10, n_aciertos:6, precision:0.6, apuntando:15.862, velocidad:19.06, reflejos:2.68, control_exc:0.7372,
+   centroid:[15.06,-4.98], ellipse:[67.35,45.51,140.6],
+   impacts:[[29.14,-7.94],[24.12,-13.35],[9.09,-7.64],[23.43,9.55],[-6.55,7.57],[20.69,-6.65],[-13.09,-18.78],[9.4,4.9],[18.3,-21.3],[7.92,-9.96]],
+   inliers:[true,true,true,true,true,true,false,true,true,true]},
+  {id:"sesion_003", day:3, date:"2026-08-21", arma:"Glock", distancia_m:10, n_disparos:10, n_aciertos:10, precision:1.0, apuntando:7.482, velocidad:19.42, reflejos:2.50, control_exc:0.9475,
+   centroid:[7.35,-1.42], ellipse:[37.61,12.03,72.46],
+   impacts:[[6.85,4.28],[9.26,6.51],[7.24,0.88],[-2.9,14.66],[10.05,-6.69],[19.4,-6.4],[3.94,-9.15],[11.09,3.68],[2.99,-9.47],[15.3,-9.71]],
+   inliers:[true,true,true,false,true,false,true,true,true,false]},
+  {id:"sesion_004", day:4, date:"2026-08-22", arma:"Glock", distancia_m:10, n_disparos:10, n_aciertos:9, precision:0.9, apuntando:4.212, velocidad:14.97, reflejos:1.96, control_exc:0.7978,
+   centroid:[-0.35,-4.20], ellipse:[65.88,39.72,149.95],
+   impacts:[[8.67,-1.63],[-20.65,-1.16],[-5.08,-8.43],[-6.16,-2.26],[-7.37,1.66],[-0.17,-19.45],[19.86,-16.74],[0.73,7.51],[-3.12,5.34],[9.79,-6.81]],
+   inliers:[true,true,true,true,true,true,true,true,true,true]},
+  {id:"sesion_005", day:5, date:"2026-08-23", arma:"Glock", distancia_m:10, n_disparos:10, n_aciertos:10, precision:1.0, apuntando:6.274, velocidad:15.02, reflejos:1.59, control_exc:0.8341,
+   centroid:[3.54,-5.18], ellipse:[38.58,21.28,142.41],
+   impacts:[[-6.09,-2.82],[0.17,0.4],[14.77,9.73],[3.64,3.36],[11.22,-12.65],[1.03,-3.65],[5.38,-8.22],[12.83,-8.41],[-7.13,13.18],[0.12,-9.46]],
+   inliers:[true,true,false,true,true,true,true,true,false,true]},
+  {id:"sesion_006", day:6, date:"2026-08-24", arma:"Glock", distancia_m:10, n_disparos:10, n_aciertos:10, precision:1.0, apuntando:3.179, velocidad:9.52, reflejos:1.98, control_exc:0.9005,
+   centroid:[1.41,-2.85], ellipse:[27.27,11.86,164.13],
+   impacts:[[6.71,-6.96],[3.84,-3.46],[2.56,13.08],[1.4,-1.69],[8.28,3.73],[-3.45,1.55],[-2.29,-1.15],[-4.49,-5.01],[9.4,-2.98],[0.17,-3.09]],
+   inliers:[true,true,false,true,false,true,true,true,true,true]},
+  {id:"sesion_007", day:7, date:"2026-08-25", arma:"Glock", distancia_m:10, n_disparos:10, n_aciertos:10, precision:1.0, apuntando:2.409, velocidad:11.68, reflejos:1.29, control_exc:0.988,
+   centroid:[2.15,-1.09], ellipse:[23.16,3.57,163.87],
+   impacts:[[4.7,-1.66],[1.47,2.7],[0.19,-0.36],[-2.16,3.92],[4.8,3.77],[0.25,-0.25],[2.92,-2.74],[-4.55,0.65],[2.51,-0.33],[9.0,-2.97]],
+   inliers:[true,false,true,false,false,true,true,true,true,true]},
+];
+
+let currentId = "sesion_007";
+const compareId = "sesion_001";
+
+/* ---------------- Header + KPIs ---------------- */
+function renderHeader(){
+  document.getElementById("badge-arma").textContent = SESSIONS[0].arma;
+  document.getElementById("badge-dist").textContent = SESSIONS[0].distancia_m + "m";
+  document.getElementById("badge-range").textContent =
+    SESSIONS[0].date + " → " + SESSIONS[SESSIONS.length-1].date;
+}
+
+function renderKPIs(){
+  const n = SESSIONS.length;
+  const avgPrecision = SESSIONS.reduce((a,s)=>a+s.precision,0) / n * 100;
+  const bestApuntando = SESSIONS.reduce((m,s)=> s.apuntando < m.apuntando ? s : m);
+  const avgVelocidad = SESSIONS.reduce((a,s)=>a+s.velocidad,0) / n;
+  const first = SESSIONS[0], last = SESSIONS[n-1];
+  const mejoraPrecision = (last.precision - first.precision) * 100;
+  const mejoraApuntando = first.apuntando - last.apuntando;
+
+  const kpis = [
+    {label:"Sesiones registradas", value:n, unit:"", sub:`${first.date} — ${last.date}`},
+    {label:"Precisión promedio", value:avgPrecision.toFixed(0), unit:"%", sub:`Día 1: ${(first.precision*100).toFixed(0)}% → Día ${n}: ${(last.precision*100).toFixed(0)}%`},
+    {label:"Mejor apuntando", value:bestApuntando.apuntando.toFixed(1), unit:"cm", sub:`Sesión ${bestApuntando.day}`},
+    {label:"Tiempo de serie prom.", value:avgVelocidad.toFixed(1), unit:"s", sub:"10 disparos por serie"},
+    {label:"Mejora en precisión", value:(mejoraPrecision>=0?"+":"")+mejoraPrecision.toFixed(0), unit:"pts", sub:"día 1 → día "+n},
+    {label:"Mejora en apuntando", value:(mejoraApuntando>=0?"−":"+")+Math.abs(mejoraApuntando).toFixed(1), unit:"cm", sub:"día 1 → día "+n},
+  ];
+
+  const grid = document.getElementById("kpi-grid");
+  grid.innerHTML = kpis.map(k => `
+    <div class="kpi">
+      <div class="label">${k.label}</div>
+      <div class="value">${k.value}<span class="unit">${k.unit}</span></div>
+      <div class="sub">${k.sub}</div>
+    </div>
+  `).join("");
+}
+
+/* ---------------- Day clip selector ---------------- */
+function renderDayClip(){
+  const clip = document.getElementById("day-clip");
+  clip.innerHTML = SESSIONS.map(s => `
+    <div class="round ${s.id===currentId?'active':''}" data-id="${s.id}" title="${s.date} — precisión ${(s.precision*100).toFixed(0)}%">
+      <div class="fill" style="height:${s.precision*100}%"></div>
+      <div class="lbl">D${s.day}</div>
+    </div>
+  `).join("");
+  clip.querySelectorAll(".round").forEach(el => {
+    el.addEventListener("click", () => {
+      currentId = el.dataset.id;
+      renderAll();
+    });
+  });
+}
+
+/* ---------------- Evolution mini line charts ---------------- */
+function evoChart(svgId, values, fmt, invertGood){
+  const svg = document.getElementById(svgId);
+  const W = 320, H = 130, padL = 26, padR = 12, padT = 14, padB = 20;
+  const n = values.length;
+  const vmin = Math.min(...values), vmax = Math.max(...values);
+  const range = (vmax - vmin) || 1;
+
+  const x = i => padL + (i/(n-1)) * (W - padL - padR);
+  const y = v => padT + (1 - (v - vmin)/range) * (H - padT - padB);
+
+  let pts = values.map((v,i) => `${x(i)},${y(v)}`).join(" ");
+
+  let dots = values.map((v,i) => `
+    <circle class="evo-dot ${SESSIONS[i].id===currentId?'current':''}" cx="${x(i)}" cy="${y(v)}" r="${SESSIONS[i].id===currentId?3.2:2.2}"/>
+  `).join("");
+
+  let ticks = values.map((v,i) => `
+    <text class="evo-tick" x="${x(i)}" y="${H-4}" text-anchor="middle">D${i+1}</text>
+  `).join("");
+
+  svg.innerHTML = `
+    <line class="evo-axis" x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}"/>
+    <line class="evo-axis" x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}"/>
+    <text class="evo-tick" x="${padL-4}" y="${padT+4}" text-anchor="end">${fmt(vmax)}</text>
+    <text class="evo-tick" x="${padL-4}" y="${H-padB}" text-anchor="end">${fmt(vmin)}</text>
+    <polyline class="evo-line" points="${pts}"/>
+    ${dots}
+    ${ticks}
+  `;
+}
+
+function renderEvolution(){
+  evoChart("evo-precision", SESSIONS.map(s=>s.precision*100), v=>v.toFixed(0)+"%");
+  evoChart("evo-apuntando", SESSIONS.map(s=>s.apuntando), v=>v.toFixed(1));
+  evoChart("evo-velocidad", SESSIONS.map(s=>s.velocidad), v=>v.toFixed(1));
+  evoChart("evo-reflejos", SESSIONS.map(s=>s.reflejos), v=>v.toFixed(2));
+}
+
+/* ---------------- Radar ---------------- */
+const RADAR_AXES = ["Precisión","Control","Apuntando","Velocidad","Reflejos"];
+
+function rawValue(s, axis){
+  if(axis==="Precisión") return s.precision;
+  if(axis==="Control") return s.control_exc;
+  if(axis==="Apuntando") return s.apuntando;
+  if(axis==="Velocidad") return s.velocidad;
+  if(axis==="Reflejos") return s.reflejos;
+}
+const AXIS_MAYOR_ES_MEJOR = {Precisión:true, Control:false, Apuntando:false, Velocidad:false, Reflejos:false};
+
+function normalizedScores(sessionId){
+  const scores = {};
+  RADAR_AXES.forEach(axis => {
+    const values = SESSIONS.map(s => rawValue(s, axis));
+    const vmin = Math.min(...values), vmax = Math.max(...values);
+    const range = (vmax - vmin) || 1;
+    const s = SESSIONS.find(s=>s.id===sessionId);
+    let score = (rawValue(s, axis) - vmin) / range * 100;
+    if(!AXIS_MAYOR_ES_MEJOR[axis]) score = 100 - score;
+    scores[axis] = score;
+  });
+  return scores;
+}
+
+function radarPoint(cx, cy, R, angleIdx, nAxes, value){
+  const angle = -Math.PI/2 + angleIdx * (2*Math.PI/nAxes);
+  const r = (value/100) * R;
+  return [cx + r*Math.cos(angle), cy + r*Math.sin(angle)];
+}
+
+function renderRadar(){
+  const svg = document.getElementById("radar-svg");
+  const cx=150, cy=150, R=105;
+  const n = RADAR_AXES.length;
+
+  let rings = [20,40,60,80,100].map(level => {
+    const pts = RADAR_AXES.map((_,i) => radarPoint(cx,cy,R,i,n,level).join(",")).join(" ");
+    return `<polygon class="grid-ring" points="${pts}"/>`;
+  }).join("");
+
+  let spokes = RADAR_AXES.map((_,i) => {
+    const [x,y] = radarPoint(cx,cy,R,i,n,100);
+    return `<line class="grid-ring" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"/>`;
+  }).join("");
+
+  let labels = RADAR_AXES.map((axis,i) => {
+    const [x,y] = radarPoint(cx,cy,R+18,i,n,100);
+    return `<text class="axis-label" x="${x}" y="${y}" text-anchor="middle">${axis}</text>`;
+  }).join("");
+
+  function shapeFor(sessionId, cls){
+    const scores = normalizedScores(sessionId);
+    const pts = RADAR_AXES.map((axis,i) => radarPoint(cx,cy,R,i,n,scores[axis]).join(",")).join(" ");
+    const verts = RADAR_AXES.map((axis,i) => {
+      const [x,y] = radarPoint(cx,cy,R,i,n,scores[axis]);
+      return `<circle class="radar-vertex ${cls}" cx="${x}" cy="${y}" r="2.6"/>`;
+    }).join("");
+    return `<polygon class="radar-shape ${cls}" points="${pts}"/>${verts}`;
+  }
+
+  svg.innerHTML = rings + spokes +
+    (currentId!==compareId ? shapeFor(compareId, "compare") : "") +
+    shapeFor(currentId, "") +
+    labels;
+
+  const s = SESSIONS.find(s=>s.id===currentId);
+  document.getElementById("radar-day-label").textContent = `Día ${s.day} (${s.date})`;
+}
+
+/* ---------------- Lamina viewer ---------------- */
+function renderLamina(){
+  const s = SESSIONS.find(s=>s.id===currentId);
+  const svg = document.getElementById("lamina-svg");
+  const hw = TARGET.width/2, hh = TARGET.height/2;
+
+  const [ew, eh, eang] = s.ellipse;
+  const [cxp, cyp] = s.centroid;
+
+  let impactsSvg = s.impacts.map(([x,y], i) => {
+    const isOutlier = !s.inliers[i];
+    return `<circle class="impact ${isOutlier?'outlier':''}" cx="${x}" cy="${-y}" r="${isOutlier?1.6:1.3}"/>`;
+  }).join("");
+
+  svg.innerHTML = `
+    <rect class="target-rect" x="${-hw}" y="${-hh}" width="${TARGET.width}" height="${TARGET.height}"/>
+    <ellipse class="target-ellipse" cx="${cxp}" cy="${-cyp}" rx="${ew/2}" ry="${eh/2}" transform="rotate(${-eang} ${cxp} ${-cyp})"/>
+    ${impactsSvg}
+    <g class="centroid-mark">
+      <line x1="${cxp-2.2}" y1="${-cyp}" x2="${cxp+2.2}" y2="${-cyp}"/>
+      <line x1="${cxp}" y1="${-cyp-2.2}" x2="${cxp}" y2="${-cyp+2.2}"/>
+    </g>
+    <circle class="aim-mark" cx="0" cy="0" r="1.1"/>
+  `;
+
+  document.getElementById("lamina-day-label").textContent = `Día ${s.day} (${s.date})`;
+  document.getElementById("li-fecha").textContent = s.date;
+  document.getElementById("li-arma").textContent = `${s.arma} · ${s.distancia_m}m`;
+  document.getElementById("li-disparos").textContent = s.n_disparos;
+  document.getElementById("li-aciertos").textContent = s.n_aciertos;
+  document.getElementById("li-precision").textContent = (s.precision*100).toFixed(0)+"%";
+  document.getElementById("li-apuntando").textContent = s.apuntando.toFixed(1)+" cm";
+  document.getElementById("li-velocidad").textContent = s.velocidad.toFixed(2)+" s";
+  document.getElementById("li-reflejos").textContent = s.reflejos.toFixed(2)+" s";
+}
+
+function renderAll(){
+  renderDayClip();
+  renderRadar();
+  renderLamina();
+}
+
+renderHeader();
+renderKPIs();
+renderEvolution();
+renderAll();
+</script>
+
+</body>
+</html>
